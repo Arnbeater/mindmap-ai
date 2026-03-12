@@ -27,6 +27,25 @@ export const useMindmapStore = create((set, get) => ({
   setEdges: (edges) => set({ edges }),
   setSelectedNodeId: (selectedNodeId) => set({ selectedNodeId }),
 
+  updateSelectedNode: ({ label, body }) => {
+    const { nodes, selectedNodeId } = get();
+
+    const nextNodes = nodes.map((node) => {
+      if (node.id !== selectedNodeId) return node;
+
+      return {
+        ...node,
+        data: {
+          ...node.data,
+          label,
+          body,
+        },
+      };
+    });
+
+    set({ nodes: nextNodes });
+  },
+
   addExpandedNodes: (sourceId, newNodes, newEdges) =>
     set((state) => ({
       nodes: [...state.nodes, ...newNodes],
