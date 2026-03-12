@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import ReactFlow, {
   Background,
   Controls,
@@ -15,9 +15,9 @@ import ReactFlow, {
 import { useMindmapStore } from "@/store/useMindmapStore";
 import NodeToolbar from "./NodeToolbar";
 
-function CustomNode({ data }) {
+function CustomNode({ data, selected }) {
   return (
-    <div className="custom-node">
+    <div className={`custom-node ${selected ? "selected-node" : ""}`}>
       <Handle type="target" position={Position.Left} />
       <strong>{data.label}</strong>
       <p>{data.body}</p>
@@ -36,12 +36,29 @@ export default function MindmapCanvas() {
   const selectedNodeId = useMindmapStore((state) => state.selectedNodeId);
   const setSelectedNodeId = useMindmapStore((state) => state.setSelectedNodeId);
   const addExpandedNodes = useMindmapStore((state) => state.addExpandedNodes);
+  const addChildNode = useMindmapStore((state) => state.addChildNode);
+  const deleteSelectedNode = useMindmapStore((state) => state.deleteSelectedNode);
+  const resetMap = useMindmapStore((state) => state.resetMap);
+  const saveToLocal = useMindmapStore((state) => state.saveToLocal);
+  const loadFromLocal = useMindmapStore((state) => state.loadFromLocal);
   const setStoreNodes = useMindmapStore((state) => state.setNodes);
   const setStoreEdges = useMindmapStore((state) => state.setEdges);
 
   const [nodes, setNodes, onNodesChange] = useNodesState(storeNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(storeEdges);
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    loadFromLocal();
+  }, [loadFromLocal]);
+
+  useEffect(() => {
+    setNodes(storeNodes);
+  }, [storeNodes, setNodes]);
+
+  useEffect(() => {
+    setEdges(storeEdges);
+  }, [storeEdges, setEdges]);
 
   const onConnect = useCallback(
     (params) => {
@@ -97,16 +114,43 @@ export default function MindmapCanvas() {
       addExpandedNodes(selectedNodeId, result.newNodes, result.newEdges);
     } catch (error) {
       console.error(error);
-      alert(`AI expansion failed: ${error.message}`);
+      alert(`Expansion failed: ${error.message}`);
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleAddChild = () => {
+    addChildNode();
+  };
+
+  const handleDelete = () => {
+    deleteSelectedNode();
+  };
+
+  const handleReset = () => {
+    resetMap();
+  };
+
+  const handleSave = () => {
+    saveToLocal();
+    alert("Project saved locally");
+  };
+
+  const handleLoad = () => {
+    loadFromLocal();
+    alert("Project loaded");
   };
 
   return (
     <div className="reactflow-wrapper">
       <NodeToolbar
         onExpand={handleExpand}
+        onAddChild={handleAddChild}
+        onDelete={handleDelete}
+        onReset={handleReset}
+        onSave={handleSave}
+        onLoad={handleLoad}
         disabled={loading}
         selectedNodeId={selectedNodeId}
       />
