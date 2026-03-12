@@ -8,6 +8,8 @@ import ReactFlow, {
   addEdge,
   useEdgesState,
   useNodesState,
+  Handle,
+  Position,
 } from "reactflow";
 
 import { useMindmapStore } from "@/store/useMindmapStore";
@@ -16,8 +18,10 @@ import NodeToolbar from "./NodeToolbar";
 function CustomNode({ data }) {
   return (
     <div className="custom-node">
+      <Handle type="target" position={Position.Left} />
       <strong>{data.label}</strong>
       <p>{data.body}</p>
+      <Handle type="source" position={Position.Right} />
     </div>
   );
 }
@@ -93,7 +97,7 @@ export default function MindmapCanvas() {
       addExpandedNodes(selectedNodeId, result.newNodes, result.newEdges);
     } catch (error) {
       console.error(error);
-      alert("AI expansion failed");
+      alert(`AI expansion failed: ${error.message}`);
     } finally {
       setLoading(false);
     }
