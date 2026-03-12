@@ -1,9 +1,3 @@
-import { getOpenAI } from "@/lib/openai";
-import { systemPrompt } from "@/lib/prompts/systemPrompt";
-import { expandNodePrompt } from "@/lib/prompts/expandNodePrompt";
-import { expandNodeSchema } from "@/lib/schemas/expandNodeSchema";
-import { makeId } from "@/lib/utils/id";
-
 export async function POST(request) {
   try {
     const body = await request.json();
@@ -22,70 +16,45 @@ export async function POST(request) {
       );
     }
 
-    const openai = getOpenAI();
-
-    const response = await openai.chat.completions.create({
-      model: "gpt-5",
-      messages: [
-        {
-          role: "system",
-          content: systemPrompt,
-        },
-        {
-          role: "user",
-          content: expandNodePrompt(selectedNode, nodes),
-        },
-      ],
-      response_format: {
-        type: "json_schema",
-        json_schema: {
-          name: "expand_node_result",
-          strict: true,
-          schema: expandNodeSchema,
-        },
-      },
-    });
-
-    const content = response.choices?.[0]?.message?.content;
-
-    if (!content) {
-      return Response.json(
-        { error: "No structured content returned" },
-        { status: 500 }
-      );
-    }
-
-    const parsed = JSON.parse(content);
     const selectedPosition = selectedNode.position || { x: 250, y: 180 };
 
-    const newNodes = parsed.newNodes.map((item, index) => ({
-      id: makeId("node"),
-      position: {
-        x: selectedPosition.x + 280,
-        y: selectedPosition.y + index * 120,
+    const newNodes = [
+      {
+        id: `node_${Math.random().toString(36).slice(2, 10)}`,
+        position: {
+          x: selectedPosition.x + 280,
+          y: selectedPosition.y,
+        },
+        data: {
+          label: "New branch",
+          body: "Dummy branch created without OpenAI",
+        },
+        type: "default",
       },
-      data: {
-        label: item.label,
-        body: item.body,
+      {
+        id: `node_${Math.random().toString(36).slice(2, 10)}`,
+        position: {
+          x: selectedPosition.x + 280,
+          y: selectedPosition.y + 120,
+        },
+        data: {
+          label: "Another branch",
+          body: "This lets you continue building the UI",
+        },
+        type: "default",
       },
-      type: "default",
-    }));
+    ];
 
     const newEdges = newNodes.map((node) => ({
-      id: makeId("edge"),
+      id: `edge_${Math.random().toString(36).slice(2, 10)}`,
       source: nodeId,
       target: node.id,
     }));
 
     return Response.json({ newNodes, newEdges });
   } catch (error) {
-    console.error(error);
-
     return Response.json(
-      {
-        error:
-          error?.message || "Failed to generate AI nodes",
-      },
+      { error: error?.message || "Dummy route failed" },
       { status: 500 }
     );
   }
