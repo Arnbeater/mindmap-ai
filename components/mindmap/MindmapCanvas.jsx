@@ -30,7 +30,7 @@ const nodeTypes = {
   default: CustomNode,
 };
 
-export default function MindmapCanvas() {
+export default function MindmapCanvas({ onOpenInspector }) {
   const storeNodes = useMindmapStore((state) => state.nodes);
   const storeEdges = useMindmapStore((state) => state.edges);
   const selectedNodeId = useMindmapStore((state) => state.selectedNodeId);
@@ -80,6 +80,14 @@ export default function MindmapCanvas() {
     [setSelectedNodeId]
   );
 
+  const onNodeDoubleClick = useCallback(
+    (_, node) => {
+      setSelectedNodeId(node.id);
+      if (onOpenInspector) onOpenInspector();
+    },
+    [setSelectedNodeId, onOpenInspector]
+  );
+
   const handleExpand = async () => {
     if (!selectedNodeId) return;
 
@@ -122,6 +130,7 @@ export default function MindmapCanvas() {
 
   const handleAddChild = () => {
     addChildNode();
+    if (onOpenInspector) onOpenInspector();
   };
 
   const handleDelete = () => {
@@ -163,6 +172,7 @@ export default function MindmapCanvas() {
         onEdgesChange={onEdgesChange}
         onConnect={onConnect}
         onSelectionChange={onSelectionChange}
+        onNodeDoubleClick={onNodeDoubleClick}
         fitView
       >
         <Background />
