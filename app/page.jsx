@@ -2,10 +2,11 @@
 
 import MindmapCanvas from "@/components/mindmap/MindmapCanvas";
 import ChatPanel from "@/components/chat/ChatPanel";
+import InspectorPanel from "@/components/sidebar/InspectorPanel";
 
 export default function HomePage() {
   return (
-    <main className="app-shell">
+    <main className="app-shell app-shell-3col">
       <section className="canvas-shell">
         <div className="topbar">
           <div>
@@ -16,6 +17,10 @@ export default function HomePage() {
 
         <MindmapCanvas />
       </section>
+
+      <aside className="inspector-shell">
+        <InspectorPanel />
+      </aside>
 
       <aside className="chat-shell">
         <ChatPanel />
