@@ -1,4 +1,4 @@
-import { openai } from "@/lib/openai";
+import { getOpenAI } from "@/lib/openai";
 import { systemPrompt } from "@/lib/prompts/systemPrompt";
 import { expandNodePrompt } from "@/lib/prompts/expandNodePrompt";
 import { expandNodeSchema } from "@/lib/schemas/expandNodeSchema";
@@ -22,11 +22,13 @@ export async function POST(request) {
       );
     }
 
+    const openai = getOpenAI();
+
     const response = await openai.chat.completions.create({
       model: "gpt-5",
       messages: [
         {
-          role: "developer",
+          role: "system",
           content: systemPrompt,
         },
         {
@@ -78,8 +80,12 @@ export async function POST(request) {
     return Response.json({ newNodes, newEdges });
   } catch (error) {
     console.error(error);
+
     return Response.json(
-      { error: "Failed to generate AI nodes" },
+      {
+        error:
+          error?.message || "Failed to generate AI nodes",
+      },
       { status: 500 }
     );
   }
