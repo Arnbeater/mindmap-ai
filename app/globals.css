@@ -20,6 +20,7 @@ body {
   display: flex;
   flex-direction: column;
   height: 100vh;
+  width: 100%;
 }
 
 .app-header {
@@ -30,6 +31,7 @@ body {
   padding: 16px 20px;
   border-bottom: 1px solid #e5e7eb;
   background: #ffffff;
+  flex: 0 0 auto;
 }
 
 .app-header h1 {
@@ -50,31 +52,34 @@ body {
 }
 
 .workspace {
-  flex: 1;
+  flex: 1 1 auto;
   min-height: 0;
-  display: flex;
   width: 100%;
+  display: flex;
+  overflow: hidden;
 }
 
 .canvas-column {
   position: relative;
-  flex: 1;
+  flex: 1 1 auto;
   min-width: 0;
   min-height: 0;
   background: #f3f4f6;
 }
 
 .side-column {
-  width: 320px;
-  min-width: 320px;
+  flex: 0 0 auto;
   border-left: 1px solid #e5e7eb;
   background: #ffffff;
   overflow: auto;
 }
 
+.inspector-column {
+  width: 320px;
+}
+
 .chat-column {
   width: 340px;
-  min-width: 340px;
 }
 
 .inspector-panel {
@@ -117,15 +122,16 @@ body {
 }
 
 .chat-panel {
-  display: flex;
-  flex-direction: column;
   height: 100%;
 }
 
-.chat-messages {
-  flex: 1;
-  overflow: auto;
+.chat-panel-inner {
   padding: 16px;
+}
+
+.chat-panel-inner h3 {
+  margin: 0 0 12px;
+  font-size: 18px;
 }
 
 .chat-message {
@@ -134,30 +140,6 @@ body {
   border-radius: 12px;
   background: #f9fafb;
   white-space: pre-wrap;
-}
-
-.chat-message.user {
-  background: #e0f2fe;
-}
-
-.chat-input-wrap {
-  padding: 12px;
-  border-top: 1px solid #e5e7eb;
-}
-
-.chat-input {
-  width: 100%;
-  min-height: 88px;
-  resize: vertical;
-  padding: 12px;
-  border: 1px solid #d1d5db;
-  border-radius: 12px;
-}
-
-.chat-actions {
-  display: flex;
-  justify-content: flex-end;
-  margin-top: 8px;
 }
 
 .button {
@@ -238,12 +220,12 @@ body {
 @media (max-width: 1200px) {
   .workspace {
     flex-direction: column;
+    overflow: auto;
   }
 
-  .side-column,
+  .inspector-column,
   .chat-column {
     width: 100%;
-    min-width: 0;
     border-left: 0;
     border-top: 1px solid #e5e7eb;
   }
