@@ -9,7 +9,6 @@ import ReactFlow, {
   useEdgesState,
   useNodesState,
 } from "reactflow";
-import "reactflow/dist/style.css";
 
 import { useMindmapStore } from "@/store/useMindmapStore";
 import NodeToolbar from "./NodeToolbar";
