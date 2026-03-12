@@ -2,31 +2,33 @@
 
 import { useState } from "react";
 import MindmapCanvas from "@/components/mindmap/MindmapCanvas";
-import ChatPanel from "@/components/chat/ChatPanel";
 import InspectorPanel from "@/components/sidebar/InspectorPanel";
+import ChatPanel from "@/components/chat/ChatPanel";
 
 export default function HomePage() {
-  const [showInspector, setShowInspector] = useState(true);
+  const [showEditor, setShowEditor] = useState(true);
   const [showChat, setShowChat] = useState(true);
 
   return (
-    <main className="app-root">
-      <header className="app-header">
+    <main className="app-shell">
+      <header className="app-topbar">
         <div>
-          <h1>Mindmap AI</h1>
-          <p>Build ideas visually. Expand them with AI.</p>
+          <h1 className="app-title">Mindmap AI</h1>
+          <p className="app-subtitle">
+            Build ideas visually. Shape them in the editor. Add AI later.
+          </p>
         </div>
 
-        <div className="header-actions">
+        <div className="topbar-actions">
           <button
-            className="button button-secondary"
-            onClick={() => setShowInspector((prev) => !prev)}
+            className="ui-button ui-button-secondary"
+            onClick={() => setShowEditor((prev) => !prev)}
           >
-            {showInspector ? "Hide editor" : "Show editor"}
+            {showEditor ? "Hide editor" : "Show editor"}
           </button>
 
           <button
-            className="button button-secondary"
+            className="ui-button ui-button-secondary"
             onClick={() => setShowChat((prev) => !prev)}
           >
             {showChat ? "Hide chat" : "Show chat"}
@@ -35,19 +37,37 @@ export default function HomePage() {
       </header>
 
       <section className="workspace">
-        <section className="canvas-column">
-          <MindmapCanvas onOpenInspector={() => setShowInspector(true)} />
+        <section className="panel panel-canvas">
+          <div className="panel-header">
+            <h2>Canvas</h2>
+          </div>
+
+          <div className="panel-body panel-body-canvas">
+            <MindmapCanvas onOpenInspector={() => setShowEditor(true)} />
+          </div>
         </section>
 
-        {showInspector && (
-          <aside className="side-column inspector-column">
-            <InspectorPanel />
+        {showEditor && (
+          <aside className="panel panel-editor">
+            <div className="panel-header">
+              <h2>Editor</h2>
+            </div>
+
+            <div className="panel-body">
+              <InspectorPanel />
+            </div>
           </aside>
         )}
 
         {showChat && (
-          <aside className="side-column chat-column">
-            <ChatPanel />
+          <aside className="panel panel-chat">
+            <div className="panel-header">
+              <h2>Chat</h2>
+            </div>
+
+            <div className="panel-body">
+              <ChatPanel />
+            </div>
           </aside>
         )}
       </section>
