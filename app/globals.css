@@ -2,6 +2,7 @@ html,
 body {
   margin: 0;
   padding: 0;
+  height: 100%;
   font-family: Arial, Helvetica, sans-serif;
   background: #f3f4f6;
   color: #111827;
@@ -11,78 +12,69 @@ body {
   box-sizing: border-box;
 }
 
-html,
-body {
-  height: 100%;
-}
-
 body {
   min-height: 100vh;
 }
 
-.app-shell {
-  display: grid;
-  height: 100vh;
-  width: 100%;
-}
-
-.app-shell-1col {
-  grid-template-columns: 1fr;
-}
-
-.app-shell-2col {
-  grid-template-columns: minmax(0, 1fr) 320px;
-}
-
-.app-shell-3col {
-  grid-template-columns: minmax(0, 1fr) 320px 340px;
-}
-
-.canvas-shell {
+.app-root {
   display: flex;
   flex-direction: column;
-  min-width: 0;
-  min-height: 0;
+  height: 100vh;
 }
 
-.topbar {
+.app-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
   padding: 16px 20px;
   border-bottom: 1px solid #e5e7eb;
-  background: white;
+  background: #ffffff;
 }
 
-.topbar h1 {
+.app-header h1 {
   margin: 0 0 4px;
   font-size: 24px;
 }
 
-.topbar p {
+.app-header p {
   margin: 0;
-  color: #6b7280;
   font-size: 14px;
+  color: #6b7280;
 }
 
-.topbar-flex {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 16px;
-}
-
-.panel-toggle-group {
+.header-actions {
   display: flex;
   gap: 8px;
   flex-wrap: wrap;
 }
 
-.inspector-shell,
-.chat-shell {
-  border-left: 1px solid #e5e7eb;
-  background: white;
+.workspace {
+  flex: 1;
+  min-height: 0;
   display: flex;
-  flex-direction: column;
+  width: 100%;
+}
+
+.canvas-column {
+  position: relative;
+  flex: 1;
   min-width: 0;
   min-height: 0;
+  background: #f3f4f6;
+}
+
+.side-column {
+  width: 320px;
+  min-width: 320px;
+  border-left: 1px solid #e5e7eb;
+  background: #ffffff;
+  overflow: auto;
+}
+
+.chat-column {
+  width: 340px;
+  min-width: 340px;
 }
 
 .inspector-panel {
@@ -99,18 +91,18 @@ body {
 
 .inspector-label {
   font-size: 13px;
-  color: #374151;
   font-weight: 600;
+  color: #374151;
 }
 
 .inspector-input,
 .inspector-textarea {
   width: 100%;
+  padding: 10px 12px;
   border: 1px solid #d1d5db;
   border-radius: 10px;
-  padding: 10px 12px;
   font: inherit;
-  background: white;
+  background: #ffffff;
 }
 
 .inspector-textarea {
@@ -149,8 +141,8 @@ body {
 }
 
 .chat-input-wrap {
-  border-top: 1px solid #e5e7eb;
   padding: 12px;
+  border-top: 1px solid #e5e7eb;
 }
 
 .chat-input {
@@ -171,7 +163,7 @@ body {
 .button {
   border: 0;
   background: #111827;
-  color: white;
+  color: #ffffff;
   padding: 10px 14px;
   border-radius: 10px;
   cursor: pointer;
@@ -190,6 +182,13 @@ body {
   background: #991b1b;
 }
 
+.reactflow-wrapper {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+}
+
 .node-toolbar {
   position: absolute;
   top: 16px;
@@ -197,26 +196,20 @@ body {
   z-index: 10;
   display: flex;
   gap: 8px;
-  padding: 10px;
-  background: rgba(255, 255, 255, 0.96);
-  border: 1px solid #e5e7eb;
-  border-radius: 12px;
   flex-wrap: wrap;
   max-width: 760px;
-}
-
-.reactflow-wrapper {
-  position: relative;
-  flex: 1;
-  min-height: 0;
+  padding: 10px;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.96);
 }
 
 .custom-node {
+  min-width: 180px;
   padding: 12px 14px;
   border: 1px solid #d1d5db;
   border-radius: 14px;
-  background: white;
-  min-width: 180px;
+  background: #ffffff;
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
 }
 
@@ -243,18 +236,23 @@ body {
 }
 
 @media (max-width: 1200px) {
-  .app-shell-3col,
-  .app-shell-2col {
-    grid-template-columns: 1fr;
+  .workspace {
+    flex-direction: column;
   }
 
-  .inspector-shell,
-  .chat-shell {
+  .side-column,
+  .chat-column {
+    width: 100%;
+    min-width: 0;
     border-left: 0;
     border-top: 1px solid #e5e7eb;
   }
 
-  .topbar-flex {
+  .canvas-column {
+    min-height: 60vh;
+  }
+
+  .app-header {
     flex-direction: column;
     align-items: flex-start;
   }
