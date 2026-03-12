@@ -44,9 +44,7 @@ export default function HomePage() {
           </div>
         </div>
 
-        <MindmapCanvas
-          onOpenInspector={() => setShowInspector(true)}
-        />
+        <MindmapCanvas onOpenInspector={() => setShowInspector(true)} />
       </section>
 
       {showInspector && (
