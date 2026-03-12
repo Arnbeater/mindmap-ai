@@ -265,7 +265,7 @@ textarea {
 
 /* Responsive */
 
-@media (max-width: 1200px) {
+@media (max-width: 900px) {
   .workspace {
     flex-direction: column;
     overflow: auto;
