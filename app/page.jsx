@@ -35,9 +35,9 @@ export default function HomePage() {
       </header>
 
       <section className="workspace">
-        <div className="canvas-column">
+        <section className="canvas-column">
           <MindmapCanvas onOpenInspector={() => setShowInspector(true)} />
-        </div>
+        </section>
 
         {showInspector && (
           <aside className="side-column inspector-column">
