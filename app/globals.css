@@ -89,6 +89,12 @@ textarea {
   flex: 0 0 330px;
 }
 
+.panel-editor,
+.panel-chat,
+.panel-canvas {
+  min-height: 0;
+}
+
 .panel-collapsed {
   width: 126px;
   flex: 0 0 126px;
@@ -308,6 +314,25 @@ textarea {
 }
 
 @media (max-width: 1150px) {
+  .app-shell {
+    padding: 18px;
+    gap: 10px;
+  }
+
+  .workspace {
+    padding: 12px;
+    border-radius: 28px;
+    gap: 12px;
+  }
+
+  .app-title {
+    font-size: 30px;
+  }
+
+  .app-subtitle {
+    font-size: 14px;
+  }
+
   .workspace {
     flex-direction: column;
     overflow: auto;
@@ -322,5 +347,104 @@ textarea {
 
   .panel-canvas {
     min-height: 60vh;
+  }
+
+  .node-toolbar {
+    max-width: calc(100% - 28px);
+  }
+}
+
+@media (max-width: 768px) {
+  .app-shell {
+    height: auto;
+    min-height: 100vh;
+    padding: 12px;
+  }
+
+  .workspace {
+    padding: 8px;
+    border-radius: 22px;
+    box-shadow:
+      0 14px 34px rgba(20, 90, 109, 0.15),
+      inset 0 1px 0 rgba(255, 255, 255, 0.7);
+  }
+
+  .panel {
+    border-radius: 20px;
+  }
+
+  .panel-header {
+    padding: 12px 12px;
+  }
+
+  .panel-body {
+    padding: 12px;
+  }
+
+  .panel-body-canvas {
+    padding: 0;
+  }
+
+  .panel-header h2 {
+    font-size: 16px;
+  }
+
+  .panel-toggle {
+    min-width: 60px;
+    padding: 7px 10px;
+    font-size: 13px;
+  }
+
+  .node-toolbar {
+    top: auto;
+    bottom: 12px;
+    left: 12px;
+    right: 12px;
+    max-width: none;
+    border-radius: 14px;
+    padding: 8px;
+    gap: 6px;
+  }
+
+  .node-toolbar .ui-button {
+    padding: 8px 10px;
+    font-size: 12px;
+    border-radius: 10px;
+  }
+
+  .custom-node {
+    min-width: 150px;
+    padding: 12px;
+  }
+
+  .custom-node strong {
+    font-size: 14px;
+  }
+
+  .custom-node p {
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 520px) {
+  .app-topbar {
+    padding: 2px 2px;
+  }
+
+  .app-title {
+    font-size: 24px;
+  }
+
+  .app-subtitle {
+    font-size: 13px;
+    margin-top: 6px;
+  }
+
+  .panel-canvas {
+    min-height: 66vh;
+  }
+
+  .inspector-textarea {
+    min-height: 130px;
   }
 }
