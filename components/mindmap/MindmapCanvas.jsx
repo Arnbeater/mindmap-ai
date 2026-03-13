@@ -6,6 +6,8 @@ import ReactFlow, {
   Controls,
   MiniMap,
   addEdge,
+  applyEdgeChanges,
+  applyNodeChanges,
   useEdgesState,
   useNodesState,
   Handle,
@@ -44,8 +46,8 @@ export default function MindmapCanvas({ onOpenInspector }) {
   const setStoreNodes = useMindmapStore((state) => state.setNodes);
   const setStoreEdges = useMindmapStore((state) => state.setEdges);
 
-  const [nodes, setNodes, onNodesChange] = useNodesState(storeNodes);
-  const [edges, setEdges, onEdgesChange] = useEdgesState(storeEdges);
+  const [nodes, setNodes] = useNodesState(storeNodes);
+  const [edges, setEdges] = useEdgesState(storeEdges);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -59,6 +61,28 @@ export default function MindmapCanvas({ onOpenInspector }) {
   useEffect(() => {
     setEdges(storeEdges);
   }, [storeEdges, setEdges]);
+
+  const handleNodesChange = useCallback(
+    (changes) => {
+      setNodes((currentNodes) => {
+        const nextNodes = applyNodeChanges(changes, currentNodes);
+        setStoreNodes(nextNodes);
+        return nextNodes;
+      });
+    },
+    [setNodes, setStoreNodes]
+  );
+
+  const handleEdgesChange = useCallback(
+    (changes) => {
+      setEdges((currentEdges) => {
+        const nextEdges = applyEdgeChanges(changes, currentEdges);
+        setStoreEdges(nextEdges);
+        return nextEdges;
+      });
+    },
+    [setEdges, setStoreEdges]
+  );
 
   const onConnect = useCallback(
     (params) => {
@@ -168,8 +192,8 @@ export default function MindmapCanvas({ onOpenInspector }) {
         nodes={nodes}
         edges={edges}
         nodeTypes={nodeTypes}
-        onNodesChange={onNodesChange}
-        onEdgesChange={onEdgesChange}
+        onNodesChange={handleNodesChange}
+        onEdgesChange={handleEdgesChange}
         onConnect={onConnect}
         onSelectionChange={onSelectionChange}
         onNodeDoubleClick={onNodeDoubleClick}
