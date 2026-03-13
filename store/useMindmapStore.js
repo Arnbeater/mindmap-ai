@@ -102,6 +102,8 @@ export const useMindmapStore = create((set, get) => ({
       edges: [...edges, newEdge],
       selectedNodeId: childId,
     });
+
+    return childId;
   },
 
   deleteNodeById: (nodeId) =>

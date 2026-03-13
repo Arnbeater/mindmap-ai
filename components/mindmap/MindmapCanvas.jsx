@@ -54,7 +54,6 @@ export default function MindmapCanvas({ onOpenInspector }) {
   const storeEdges = useMindmapStore((state) => state.edges);
   const selectedNodeId = useMindmapStore((state) => state.selectedNodeId);
   const setSelectedNodeId = useMindmapStore((state) => state.setSelectedNodeId);
-  const addExpandedNodes = useMindmapStore((state) => state.addExpandedNodes);
   const addChildNode = useMindmapStore((state) => state.addChildNode);
   const deleteSelectedNode = useMindmapStore((state) => state.deleteSelectedNode);
   const deleteNodeById = useMindmapStore((state) => state.deleteNodeById);
@@ -81,22 +80,25 @@ export default function MindmapCanvas({ onOpenInspector }) {
     setEdges(storeEdges);
   }, [storeEdges, setEdges]);
 
-  useEffect(() => {
-    if (!reactFlowInstance || !selectedNodeId) return;
+  const centerOnNode = useCallback(
+    (nodeId, sourceNodes = nodes) => {
+      if (!reactFlowInstance || !nodeId) return;
 
-    const activeNode = nodes.find((node) => node.id === selectedNodeId);
-    if (!activeNode) return;
+      const node = sourceNodes.find((item) => item.id === nodeId);
+      if (!node) return;
 
-    const nodeWidth = activeNode.measured?.width || activeNode.width || 200;
-    const nodeHeight = activeNode.measured?.height || activeNode.height || 100;
-    const zoom = reactFlowInstance.getZoom();
+      const nodeWidth = node.measured?.width || node.width || 200;
+      const nodeHeight = node.measured?.height || node.height || 100;
+      const zoom = reactFlowInstance.getZoom();
 
-    reactFlowInstance.setCenter(
-      activeNode.position.x + nodeWidth / 2,
-      activeNode.position.y + nodeHeight / 2,
-      { zoom, duration: 260 }
-    );
-  }, [reactFlowInstance, selectedNodeId]);
+      reactFlowInstance.setCenter(
+        node.position.x + nodeWidth / 2,
+        node.position.y + nodeHeight / 2,
+        { zoom, duration: 260 }
+      );
+    },
+    [reactFlowInstance, nodes]
+  );
 
   const handleNodesChange = useCallback(
     (changes) => {
@@ -134,18 +136,21 @@ export default function MindmapCanvas({ onOpenInspector }) {
   const onSelectionChange = useCallback(
     ({ nodes: selectedNodes }) => {
       if (selectedNodes?.length) {
-        setSelectedNodeId(selectedNodes[0].id);
+        const activeId = selectedNodes[0].id;
+        setSelectedNodeId(activeId);
+        centerOnNode(activeId);
       }
     },
-    [setSelectedNodeId]
+    [setSelectedNodeId, centerOnNode]
   );
 
   const onNodeDoubleClick = useCallback(
     (_, node) => {
       setSelectedNodeId(node.id);
+      centerOnNode(node.id);
       if (onOpenInspector) onOpenInspector();
     },
-    [setSelectedNodeId, onOpenInspector]
+    [setSelectedNodeId, centerOnNode, onOpenInspector]
   );
 
   const handleDeleteNode = useCallback(
@@ -194,12 +199,14 @@ export default function MindmapCanvas({ onOpenInspector }) {
 
       const nextNodes = [...nodes, ...result.newNodes];
       const nextEdges = [...edges, ...result.newEdges];
+      const newActiveId = result.newNodes?.[0]?.id || selectedNodeId;
 
       setNodes(nextNodes);
       setEdges(nextEdges);
       setStoreNodes(nextNodes);
       setStoreEdges(nextEdges);
-      addExpandedNodes(selectedNodeId, result.newNodes, result.newEdges);
+      setSelectedNodeId(newActiveId);
+      centerOnNode(newActiveId, nextNodes);
     } catch (error) {
       console.error(error);
       alert(`Expansion failed: ${error.message}`);
@@ -209,7 +216,12 @@ export default function MindmapCanvas({ onOpenInspector }) {
   };
 
   const handleAddChild = () => {
-    addChildNode();
+    const newNodeId = addChildNode();
+    if (newNodeId) {
+      const nextNodes = useMindmapStore.getState().nodes;
+      centerOnNode(newNodeId, nextNodes);
+    }
+
     if (onOpenInspector) onOpenInspector();
   };
 
