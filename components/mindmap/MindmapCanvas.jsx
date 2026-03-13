@@ -5,6 +5,7 @@ import ReactFlow, {
   Background,
   Controls,
   MiniMap,
+  NodeToolbar as ReactFlowNodeToolbar,
   addEdge,
   applyEdgeChanges,
   applyNodeChanges,
@@ -66,6 +67,7 @@ export default function MindmapCanvas({ onOpenInspector }) {
   const [nodes, setNodes] = useNodesState(storeNodes);
   const [edges, setEdges] = useEdgesState(storeEdges);
   const [loading, setLoading] = useState(false);
+  const [reactFlowInstance, setReactFlowInstance] = useState(null);
 
   useEffect(() => {
     loadFromLocal();
@@ -78,6 +80,23 @@ export default function MindmapCanvas({ onOpenInspector }) {
   useEffect(() => {
     setEdges(storeEdges);
   }, [storeEdges, setEdges]);
+
+  useEffect(() => {
+    if (!reactFlowInstance || !selectedNodeId) return;
+
+    const activeNode = nodes.find((node) => node.id === selectedNodeId);
+    if (!activeNode) return;
+
+    const nodeWidth = activeNode.measured?.width || activeNode.width || 200;
+    const nodeHeight = activeNode.measured?.height || activeNode.height || 100;
+    const zoom = reactFlowInstance.getZoom();
+
+    reactFlowInstance.setCenter(
+      activeNode.position.x + nodeWidth / 2,
+      activeNode.position.y + nodeHeight / 2,
+      { zoom, duration: 260 }
+    );
+  }, [reactFlowInstance, selectedNodeId]);
 
   const handleNodesChange = useCallback(
     (changes) => {
@@ -214,17 +233,6 @@ export default function MindmapCanvas({ onOpenInspector }) {
 
   return (
     <div className="reactflow-wrapper">
-      <NodeToolbar
-        onExpand={handleExpand}
-        onAddChild={handleAddChild}
-        onDelete={handleDelete}
-        onReset={handleReset}
-        onSave={handleSave}
-        onLoad={handleLoad}
-        disabled={loading}
-        selectedNodeId={selectedNodeId}
-      />
-
       <ReactFlow
         nodes={mappedNodes}
         edges={edges}
@@ -234,8 +242,28 @@ export default function MindmapCanvas({ onOpenInspector }) {
         onConnect={onConnect}
         onSelectionChange={onSelectionChange}
         onNodeDoubleClick={onNodeDoubleClick}
+        onInit={setReactFlowInstance}
         fitView
       >
+        <ReactFlowNodeToolbar
+          className="node-toolbar"
+          nodeId={selectedNodeId}
+          isVisible={Boolean(selectedNodeId)}
+          position={Position.Top}
+          offset={16}
+        >
+          <NodeToolbar
+            onExpand={handleExpand}
+            onAddChild={handleAddChild}
+            onDelete={handleDelete}
+            onReset={handleReset}
+            onSave={handleSave}
+            onLoad={handleLoad}
+            disabled={loading}
+            selectedNodeId={selectedNodeId}
+          />
+        </ReactFlowNodeToolbar>
+
         <Background />
         <Controls />
         <MiniMap />
