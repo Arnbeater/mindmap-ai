@@ -177,6 +177,7 @@ textarea {
 }
 
 .custom-node {
+  position: relative;
   min-width: 180px;
   padding: 14px 16px;
   border-radius: 18px;
@@ -195,6 +196,27 @@ textarea {
   margin: 0;
   font-size: 13px;
   color: #3d7488;
+}
+
+
+.node-delete-button {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 24px;
+  height: 24px;
+  border: 0;
+  border-radius: 999px;
+  cursor: pointer;
+  font-size: 18px;
+  line-height: 1;
+  color: #ffffff;
+  background: linear-gradient(135deg, #ef7287 0%, #d4546d 100%);
+  box-shadow: 0 6px 12px rgba(212, 84, 109, 0.28);
+}
+
+.node-delete-button:hover {
+  transform: translateY(-1px);
 }
 
 .selected-node {

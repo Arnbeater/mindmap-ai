@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import ReactFlow, {
   Background,
   Controls,
@@ -17,10 +17,26 @@ import ReactFlow, {
 import { useMindmapStore } from "@/store/useMindmapStore";
 import NodeToolbar from "./NodeToolbar";
 
-function CustomNode({ data, selected }) {
+function CustomNode({ id, data, selected }) {
   return (
     <div className={`custom-node ${selected ? "selected-node" : ""}`}>
       <Handle type="target" position={Position.Left} />
+
+      {data.canDelete && (
+        <button
+          type="button"
+          className="node-delete-button nodrag nopan"
+          onClick={(event) => {
+            event.stopPropagation();
+            data.onDelete?.(id);
+          }}
+          aria-label="Delete note"
+          title="Delete note"
+        >
+          ×
+        </button>
+      )}
+
       <strong>{data.label}</strong>
       <p>{data.body}</p>
       <Handle type="source" position={Position.Right} />
@@ -40,6 +56,7 @@ export default function MindmapCanvas({ onOpenInspector }) {
   const addExpandedNodes = useMindmapStore((state) => state.addExpandedNodes);
   const addChildNode = useMindmapStore((state) => state.addChildNode);
   const deleteSelectedNode = useMindmapStore((state) => state.deleteSelectedNode);
+  const deleteNodeById = useMindmapStore((state) => state.deleteNodeById);
   const resetMap = useMindmapStore((state) => state.resetMap);
   const saveToLocal = useMindmapStore((state) => state.saveToLocal);
   const loadFromLocal = useMindmapStore((state) => state.loadFromLocal);
@@ -110,6 +127,26 @@ export default function MindmapCanvas({ onOpenInspector }) {
       if (onOpenInspector) onOpenInspector();
     },
     [setSelectedNodeId, onOpenInspector]
+  );
+
+  const handleDeleteNode = useCallback(
+    (nodeId) => {
+      deleteNodeById(nodeId);
+    },
+    [deleteNodeById]
+  );
+
+  const mappedNodes = useMemo(
+    () =>
+      nodes.map((node) => ({
+        ...node,
+        data: {
+          ...node.data,
+          canDelete: node.id !== "root",
+          onDelete: handleDeleteNode,
+        },
+      })),
+    [nodes, handleDeleteNode]
   );
 
   const handleExpand = async () => {
@@ -189,7 +226,7 @@ export default function MindmapCanvas({ onOpenInspector }) {
       />
 
       <ReactFlow
-        nodes={nodes}
+        nodes={mappedNodes}
         edges={edges}
         nodeTypes={nodeTypes}
         onNodesChange={handleNodesChange}
