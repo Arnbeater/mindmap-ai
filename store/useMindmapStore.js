@@ -18,6 +18,22 @@ function makeId(prefix = "id") {
   return `${prefix}_${Math.random().toString(36).slice(2, 10)}`;
 }
 
+function removeNodeFromState(state, nodeId) {
+  if (!nodeId || nodeId === "root") return state;
+
+  const nextNodes = state.nodes.filter((node) => node.id !== nodeId);
+  const nextEdges = state.edges.filter(
+    (edge) => edge.source !== nodeId && edge.target !== nodeId
+  );
+
+  return {
+    ...state,
+    nodes: nextNodes,
+    edges: nextEdges,
+    selectedNodeId: state.selectedNodeId === nodeId ? "root" : state.selectedNodeId,
+  };
+}
+
 export const useMindmapStore = create((set, get) => ({
   nodes: initialNodes,
   edges: initialEdges,
@@ -86,24 +102,15 @@ export const useMindmapStore = create((set, get) => ({
       edges: [...edges, newEdge],
       selectedNodeId: childId,
     });
+
+    return childId;
   },
 
-  deleteSelectedNode: () => {
-    const { nodes, edges, selectedNodeId } = get();
+  deleteNodeById: (nodeId) =>
+    set((state) => removeNodeFromState(state, nodeId)),
 
-    if (!selectedNodeId || selectedNodeId === "root") return;
-
-    const nextNodes = nodes.filter((node) => node.id !== selectedNodeId);
-    const nextEdges = edges.filter(
-      (edge) => edge.source !== selectedNodeId && edge.target !== selectedNodeId
-    );
-
-    set({
-      nodes: nextNodes,
-      edges: nextEdges,
-      selectedNodeId: "root",
-    });
-  },
+  deleteSelectedNode: () =>
+    set((state) => removeNodeFromState(state, state.selectedNodeId)),
 
   resetMap: () =>
     set({
