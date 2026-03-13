@@ -39,6 +39,8 @@ OPENROUTER_APP_NAME=Mindmap AI
 
 Then restart dev server.
 
+If you use an `sk-or-v1` key and forget `OPENAI_BASE_URL`, the app now auto-routes to OpenRouter by default.
+
 ### Notes
 - If `OPENAI_API_KEY` is missing, node expansion falls back to dummy branches so UI still works.
 - If `OPENAI_API_KEY` is missing, chat returns setup guidance in-app until configured.
@@ -61,6 +63,6 @@ In Vercel project settings:
 - **Expand returns fallback branches**
   - Check that `OPENAI_API_KEY` exists in local `.env.local` or Vercel env vars.
 - **Chat/Expand route returns 500 with OpenRouter key**
-  - Verify `OPENAI_BASE_URL=https://openrouter.ai/api/v1` and a valid `OPENAI_MODEL` (for example `openai/gpt-4o-mini`).
+  - Verify `OPENAI_BASE_URL=https://openrouter.ai/api/v1` (or rely on auto-detection for `sk-or-v1` keys) and a valid `OPENAI_MODEL` (for example `openai/gpt-4o-mini`).
 - **OpenAI/OpenRouter not used in Vercel**
   - Confirm variables are set for the correct environment (Preview/Production) and redeploy.
