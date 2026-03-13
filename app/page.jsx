@@ -15,24 +15,8 @@ export default function HomePage() {
         <div>
           <h1 className="app-title">Mindmap AI</h1>
           <p className="app-subtitle">
-            Build ideas visually. Shape them in the editor. Add AI later.
+            Build ideas visually. Shape them in the editor. Expand with AI branches.
           </p>
-        </div>
-
-        <div className="topbar-actions">
-          <button
-            className="ui-button ui-button-secondary"
-            onClick={() => setShowEditor((prev) => !prev)}
-          >
-            {showEditor ? "Hide editor" : "Show editor"}
-          </button>
-
-          <button
-            className="ui-button ui-button-secondary"
-            onClick={() => setShowChat((prev) => !prev)}
-          >
-            {showChat ? "Hide chat" : "Show chat"}
-          </button>
         </div>
       </header>
 
@@ -47,29 +31,43 @@ export default function HomePage() {
           </div>
         </section>
 
-        {showEditor && (
-          <aside className="panel panel-editor">
-            <div className="panel-header">
-              <h2>Editor</h2>
-            </div>
+        <aside className={`panel panel-editor ${showEditor ? "" : "panel-collapsed"}`}>
+          <div className="panel-header">
+            <h2>Editor</h2>
+            <button
+              className="ui-button ui-button-secondary panel-toggle"
+              onClick={() => setShowEditor((prev) => !prev)}
+              aria-expanded={showEditor}
+            >
+              {showEditor ? "Hide" : "Show"}
+            </button>
+          </div>
 
+          {showEditor && (
             <div className="panel-body">
               <InspectorPanel />
             </div>
-          </aside>
-        )}
+          )}
+        </aside>
 
-        {showChat && (
-          <aside className="panel panel-chat">
-            <div className="panel-header">
-              <h2>Chat</h2>
-            </div>
+        <aside className={`panel panel-chat ${showChat ? "" : "panel-collapsed"}`}>
+          <div className="panel-header">
+            <h2>Chat</h2>
+            <button
+              className="ui-button ui-button-secondary panel-toggle"
+              onClick={() => setShowChat((prev) => !prev)}
+              aria-expanded={showChat}
+            >
+              {showChat ? "Hide" : "Show"}
+            </button>
+          </div>
 
+          {showChat && (
             <div className="panel-body">
               <ChatPanel />
             </div>
-          </aside>
-        )}
+          )}
+        </aside>
       </section>
     </main>
   );
