@@ -1,4 +1,4 @@
-import { getDefaultModel, getOpenAI } from "@/lib/openai";
+import { getOpenAI } from "@/lib/openai";
 
 const chatSystemPrompt = `
 You are a helpful assistant inside a mindmap app.
@@ -37,7 +37,7 @@ export async function POST(request) {
 
     const client = getOpenAI();
     const completion = await client.responses.create({
-      model: getDefaultModel(),
+      model: process.env.OPENAI_MODEL || "gpt-4.1-mini",
       input: [
         {
           role: "system",
