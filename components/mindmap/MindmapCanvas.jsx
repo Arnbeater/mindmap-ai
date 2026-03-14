@@ -19,6 +19,29 @@ import { useMindmapStore } from "@/store/useMindmapStore";
 import NodeToolbar from "./NodeToolbar";
 
 function CustomNode({ id, data, selected }) {
+  const [isEditing, setIsEditing] = useState(false);
+  const [label, setLabel] = useState(data.label || "");
+  const [body, setBody] = useState(data.body || "");
+
+  useEffect(() => {
+    setLabel(data.label || "");
+    setBody(data.body || "");
+  }, [data.label, data.body]);
+
+  useEffect(() => {
+    if (!selected) {
+      setIsEditing(false);
+    }
+  }, [selected]);
+
+  const handleSaveInline = () => {
+    data.onInlineUpdate?.(id, {
+      label: label.trim() || "Untitled node",
+      body: body.trim(),
+    });
+    setIsEditing(false);
+  };
+
   return (
     <div className={`custom-node ${selected ? "selected-node" : ""}`}>
       <Handle type="target" position={Position.Left} />
@@ -38,8 +61,58 @@ function CustomNode({ id, data, selected }) {
         </button>
       )}
 
-      <strong>{data.label}</strong>
-      <p>{data.body}</p>
+      {selected && !isEditing && (
+        <button
+          type="button"
+          className="node-edit-button nodrag nopan"
+          onClick={(event) => {
+            event.stopPropagation();
+            setIsEditing(true);
+          }}
+        >
+          Edit
+        </button>
+      )}
+
+      {isEditing ? (
+        <div className="node-inline-editor nodrag nopan">
+          <input
+            className="node-inline-input"
+            value={label}
+            onChange={(event) => setLabel(event.target.value)}
+            placeholder="Node title"
+          />
+          <textarea
+            className="node-inline-textarea"
+            value={body}
+            onChange={(event) => setBody(event.target.value)}
+            placeholder="Node details"
+            rows={3}
+          />
+          <div className="node-inline-actions">
+            <button type="button" className="ui-button" onClick={handleSaveInline}>
+              Save
+            </button>
+            <button
+              type="button"
+              className="ui-button ui-button-secondary"
+              onClick={() => {
+                setLabel(data.label || "");
+                setBody(data.body || "");
+                setIsEditing(false);
+              }}
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      ) : (
+        <>
+          <strong>{data.label}</strong>
+          <p>{data.body}</p>
+        </>
+      )}
+
       <Handle type="source" position={Position.Right} />
     </div>
   );
@@ -57,6 +130,7 @@ export default function MindmapCanvas({ onOpenInspector }) {
   const addChildNode = useMindmapStore((state) => state.addChildNode);
   const deleteSelectedNode = useMindmapStore((state) => state.deleteSelectedNode);
   const deleteNodeById = useMindmapStore((state) => state.deleteNodeById);
+  const updateNodeById = useMindmapStore((state) => state.updateNodeById);
   const resetMap = useMindmapStore((state) => state.resetMap);
   const saveToLocal = useMindmapStore((state) => state.saveToLocal);
   const loadFromLocal = useMindmapStore((state) => state.loadFromLocal);
@@ -160,6 +234,17 @@ export default function MindmapCanvas({ onOpenInspector }) {
     [deleteNodeById]
   );
 
+  const handleInlineUpdateNode = useCallback(
+    (nodeId, payload) => {
+      updateNodeById(nodeId, payload);
+      const nextNodes = useMindmapStore.getState().nodes;
+      setNodes(nextNodes);
+      setStoreNodes(nextNodes);
+      saveToLocal();
+    },
+    [updateNodeById, setNodes, setStoreNodes, saveToLocal]
+  );
+
   const mappedNodes = useMemo(
     () =>
       nodes.map((node) => ({
@@ -168,9 +253,10 @@ export default function MindmapCanvas({ onOpenInspector }) {
           ...node.data,
           canDelete: node.id !== "root",
           onDelete: handleDeleteNode,
+          onInlineUpdate: handleInlineUpdateNode,
         },
       })),
-    [nodes, handleDeleteNode]
+    [nodes, handleDeleteNode, handleInlineUpdateNode]
   );
 
   const handleExpand = async () => {

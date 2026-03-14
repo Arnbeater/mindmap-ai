@@ -189,6 +189,21 @@ textarea {
   box-shadow: 0 10px 22px rgba(56, 145, 165, 0.18);
 }
 
+.react-flow__node-default {
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.react-flow__node-default.selectable.selected,
+.react-flow__node-default.selectable:focus,
+.react-flow__node-default.selectable:focus-visible {
+  box-shadow: none;
+  outline: none;
+}
+
 .custom-node strong {
   display: block;
   margin-bottom: 6px;
@@ -230,6 +245,52 @@ textarea {
 .node-delete-button:hover {
   color: #ffffff;
   background: rgba(212, 84, 109, 0.9);
+}
+
+
+.node-edit-button {
+  position: absolute;
+  top: 8px;
+  right: 32px;
+  border: 0;
+  border-radius: 999px;
+  padding: 4px 8px;
+  cursor: pointer;
+  font-size: 11px;
+  color: #2f7790;
+  background: rgba(255, 255, 255, 0.75);
+}
+
+.node-inline-editor {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.node-inline-input,
+.node-inline-textarea {
+  width: 100%;
+  border: 1px solid rgba(57, 157, 182, 0.3);
+  border-radius: 10px;
+  padding: 8px 10px;
+  background: rgba(255, 255, 255, 0.96);
+  color: #143949;
+}
+
+.node-inline-textarea {
+  resize: vertical;
+  min-height: 64px;
+}
+
+.node-inline-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.node-inline-actions .ui-button {
+  padding: 6px 10px;
+  border-radius: 10px;
+  font-size: 12px;
 }
 
 .selected-node {

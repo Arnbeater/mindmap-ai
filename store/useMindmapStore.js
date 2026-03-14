@@ -43,6 +43,22 @@ export const useMindmapStore = create((set, get) => ({
   setEdges: (edges) => set({ edges }),
   setSelectedNodeId: (selectedNodeId) => set({ selectedNodeId }),
 
+  updateNodeById: (nodeId, { label, body }) =>
+    set((state) => ({
+      nodes: state.nodes.map((node) =>
+        node.id === nodeId
+          ? {
+              ...node,
+              data: {
+                ...node.data,
+                label,
+                body,
+              },
+            }
+          : node
+      ),
+    })),
+
   updateSelectedNode: ({ label, body }) => {
     const { nodes, selectedNodeId } = get();
 
