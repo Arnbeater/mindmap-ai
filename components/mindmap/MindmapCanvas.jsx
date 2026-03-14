@@ -141,10 +141,22 @@ export default function MindmapCanvas({ onOpenInspector }) {
   const [edges, setEdges] = useEdgesState(storeEdges);
   const [loading, setLoading] = useState(false);
   const [reactFlowInstance, setReactFlowInstance] = useState(null);
+  const [isHydrated, setIsHydrated] = useState(false);
 
   useEffect(() => {
     loadFromLocal();
+    setIsHydrated(true);
   }, [loadFromLocal]);
+
+  useEffect(() => {
+    if (!isHydrated) return;
+
+    const timer = setTimeout(() => {
+      saveToLocal();
+    }, 450);
+
+    return () => clearTimeout(timer);
+  }, [storeNodes, storeEdges, selectedNodeId, isHydrated, saveToLocal]);
 
   useEffect(() => {
     setNodes(storeNodes);
@@ -325,8 +337,8 @@ export default function MindmapCanvas({ onOpenInspector }) {
   };
 
   const handleLoad = () => {
-    loadFromLocal();
-    alert("Project loaded");
+    const project = loadFromLocal();
+    alert(`Loaded "${project?.name || "map"}"`);
   };
 
   return (
