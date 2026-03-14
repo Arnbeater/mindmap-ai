@@ -1,4 +1,4 @@
-import { getOpenAI } from "@/lib/openai";
+import { getDefaultModel, getOpenAI } from "@/lib/openai";
 import { expandNodePrompt } from "@/lib/prompts/expandNodePrompt";
 import { systemPrompt } from "@/lib/prompts/systemPrompt";
 import { makeId } from "@/lib/utils/id";
@@ -91,7 +91,7 @@ export async function POST(request) {
 
     const client = getOpenAI();
     const completion = await client.responses.create({
-      model: process.env.OPENAI_MODEL || "gpt-4.1-mini",
+      model: getDefaultModel(),
       input: [
         {
           role: "system",

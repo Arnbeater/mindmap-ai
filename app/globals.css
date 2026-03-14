@@ -189,6 +189,21 @@ textarea {
   box-shadow: 0 10px 22px rgba(56, 145, 165, 0.18);
 }
 
+.react-flow__node-default {
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.react-flow__node-default.selectable.selected,
+.react-flow__node-default.selectable:focus,
+.react-flow__node-default.selectable:focus-visible {
+  box-shadow: none;
+  outline: none;
+}
+
 .custom-node strong {
   display: block;
   margin-bottom: 6px;
