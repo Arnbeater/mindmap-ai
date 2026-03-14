@@ -1,5 +1,11 @@
 import { create } from "zustand";
 
+const STORAGE_KEYS = {
+  legacyProject: "mindmap-ai-project",
+  projects: "mindmap-ai-projects",
+  activeProjectId: "mindmap-ai-active-project-id",
+};
+
 const initialNodes = [
   {
     id: "root",
@@ -18,6 +24,39 @@ function makeId(prefix = "id") {
   return `${prefix}_${Math.random().toString(36).slice(2, 10)}`;
 }
 
+function createNewProject(name = "Untitled map") {
+  const now = new Date().toISOString();
+
+  return {
+    id: makeId("map"),
+    name,
+    nodes: initialNodes,
+    edges: initialEdges,
+    selectedNodeId: "root",
+    createdAt: now,
+    updatedAt: now,
+  };
+}
+
+function getStorageProjects() {
+  const raw = localStorage.getItem(STORAGE_KEYS.projects);
+  if (!raw) return [];
+
+  try {
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+
+    return parsed.filter((project) => project && project.id);
+  } catch (error) {
+    console.error("Failed to parse saved maps", error);
+    return [];
+  }
+}
+
+function persistProjects(projects) {
+  localStorage.setItem(STORAGE_KEYS.projects, JSON.stringify(projects));
+}
+
 function removeNodeFromState(state, nodeId) {
   if (!nodeId || nodeId === "root") return state;
 
@@ -34,10 +73,20 @@ function removeNodeFromState(state, nodeId) {
   };
 }
 
+function toProjectSummary(project) {
+  return {
+    id: project.id,
+    name: project.name,
+    updatedAt: project.updatedAt,
+  };
+}
+
 export const useMindmapStore = create((set, get) => ({
   nodes: initialNodes,
   edges: initialEdges,
   selectedNodeId: "root",
+  activeProjectId: null,
+  savedMaps: [],
 
   setNodes: (nodes) => set({ nodes }),
   setEdges: (edges) => set({ edges }),
@@ -135,33 +184,138 @@ export const useMindmapStore = create((set, get) => ({
       selectedNodeId: "root",
     }),
 
-  saveToLocal: () => {
-    const { nodes, edges, selectedNodeId } = get();
+  saveToLocal: (nameOverride) => {
+    const { nodes, edges, selectedNodeId, activeProjectId } = get();
+    const now = new Date().toISOString();
+    const nextName = nameOverride?.trim();
+    const projects = getStorageProjects();
 
-    localStorage.setItem(
-      "mindmap-ai-project",
-      JSON.stringify({
-        nodes,
-        edges,
-        selectedNodeId,
-      })
-    );
+    let projectId = activeProjectId;
+    if (!projectId) {
+      const freshProject = createNewProject(nextName || "Untitled map");
+      projectId = freshProject.id;
+    }
+
+    const existingProject = projects.find((project) => project.id === projectId);
+    const nextProject = {
+      id: projectId,
+      name: nextName || existingProject?.name || "Untitled map",
+      nodes,
+      edges,
+      selectedNodeId,
+      createdAt: existingProject?.createdAt || now,
+      updatedAt: now,
+    };
+
+    const nextProjects = existingProject
+      ? projects.map((project) => (project.id === projectId ? nextProject : project))
+      : [nextProject, ...projects];
+
+    persistProjects(nextProjects);
+    localStorage.setItem(STORAGE_KEYS.activeProjectId, projectId);
+
+    set({
+      activeProjectId: projectId,
+      savedMaps: nextProjects.map(toProjectSummary),
+    });
+
+    return nextProject;
   },
 
-  loadFromLocal: () => {
-    const raw = localStorage.getItem("mindmap-ai-project");
-    if (!raw) return;
+  loadFromLocal: (projectIdOverride) => {
+    let projects = getStorageProjects();
 
-    try {
-      const parsed = JSON.parse(raw);
+    if (!projects.length) {
+      const legacyRaw = localStorage.getItem(STORAGE_KEYS.legacyProject);
 
-      set({
-        nodes: parsed.nodes || initialNodes,
-        edges: parsed.edges || initialEdges,
-        selectedNodeId: parsed.selectedNodeId || "root",
-      });
-    } catch (error) {
-      console.error("Failed to load project from localStorage", error);
+      if (legacyRaw) {
+        try {
+          const parsedLegacy = JSON.parse(legacyRaw);
+          const migratedProject = {
+            ...createNewProject("My first map"),
+            nodes: parsedLegacy.nodes || initialNodes,
+            edges: parsedLegacy.edges || initialEdges,
+            selectedNodeId: parsedLegacy.selectedNodeId || "root",
+          };
+
+          projects = [migratedProject];
+          persistProjects(projects);
+          localStorage.removeItem(STORAGE_KEYS.legacyProject);
+        } catch (error) {
+          console.error("Failed to migrate legacy project", error);
+        }
+      }
     }
+
+    if (!projects.length) {
+      const starterProject = createNewProject("My first map");
+      projects = [starterProject];
+      persistProjects(projects);
+    }
+
+    const storedActiveId = localStorage.getItem(STORAGE_KEYS.activeProjectId);
+    const targetId = projectIdOverride || storedActiveId;
+    const activeProject =
+      projects.find((project) => project.id === targetId) || projects[0];
+
+    if (!activeProject) return;
+
+    localStorage.setItem(STORAGE_KEYS.activeProjectId, activeProject.id);
+
+    set({
+      nodes: activeProject.nodes || initialNodes,
+      edges: activeProject.edges || initialEdges,
+      selectedNodeId: activeProject.selectedNodeId || "root",
+      activeProjectId: activeProject.id,
+      savedMaps: projects.map(toProjectSummary),
+    });
+
+    return activeProject;
+  },
+
+  createProject: (name = "Untitled map") => {
+    const newProject = createNewProject(name.trim() || "Untitled map");
+    const projects = [newProject, ...getStorageProjects()];
+
+    persistProjects(projects);
+    localStorage.setItem(STORAGE_KEYS.activeProjectId, newProject.id);
+
+    set({
+      nodes: newProject.nodes,
+      edges: newProject.edges,
+      selectedNodeId: newProject.selectedNodeId,
+      activeProjectId: newProject.id,
+      savedMaps: projects.map(toProjectSummary),
+    });
+
+    return newProject;
+  },
+
+  deleteProject: (projectId) => {
+    const projects = getStorageProjects();
+    const nextProjects = projects.filter((project) => project.id !== projectId);
+
+    if (!nextProjects.length) {
+      const starterProject = createNewProject("My first map");
+      nextProjects.push(starterProject);
+    }
+
+    persistProjects(nextProjects);
+
+    const { activeProjectId } = get();
+    const nextActiveProject =
+      nextProjects.find((project) => project.id === activeProjectId) || nextProjects[0];
+
+    localStorage.setItem(STORAGE_KEYS.activeProjectId, nextActiveProject.id);
+
+    set({
+      nodes: nextActiveProject.nodes || initialNodes,
+      edges: nextActiveProject.edges || initialEdges,
+      selectedNodeId: nextActiveProject.selectedNodeId || "root",
+      activeProjectId: nextActiveProject.id,
+      savedMaps: nextProjects.map(toProjectSummary),
+    });
+
+    return nextActiveProject;
   },
 }));
